@@ -1,8 +1,16 @@
 const express = require('express');
-const Quotes = require('inspirational-quotes');
 const app = express();
-// const cors = require("cors");
-// app.use(cors());
+const Quotes = require('inspirational-quotes');
+const mongoose = require('mongoose');
+
+const cors = require("cors");
+
+app.use(express.json());
+app.use(cors());
+
+
+// connect to the cluster
+// TODO: 
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', "*");
