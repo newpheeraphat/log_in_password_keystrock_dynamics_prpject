@@ -2,6 +2,52 @@ import React, { useState } from 'react'
 import Axios from "axios";
 
 const Register = () => {
+    // ----------------------------------------------
+    const isStrongPassword = (password) => {
+        const hasUpperCases = /[A-Z]/.test(password);
+        const hasLowerCases = /[a-z]/.test(password);
+        const hasNumbers = /[0-9]/.test(password);
+        const hasSpecialCharacters = /[^A-Za-z0-9]/.test(password);
+    
+        return (
+            password.length >= 12 &&
+            hasUpperCases &&
+            hasLowerCases &&
+            hasNumbers &&
+            hasSpecialCharacters
+        );
+    };
+    
+    const isMediumPassword = (password) => {
+        const hasUpperCases = /[A-Z]/.test(password);
+        const hasLowerCases = /[a-z]/.test(password);
+        const hasNumbers = /[0-9]/.test(password);
+    
+        return (
+            password.length >= 8 &&
+            hasUpperCases &&
+            hasLowerCases &&
+            hasNumbers
+        );
+    };
+    
+    const getPasswordStrengthFactor = (password) => {
+        if (isStrongPassword(password)) {
+            return 0.1;
+        } else if (isMediumPassword(password)) {
+            return 0.2;
+        } else {
+            return 0.3;
+        }
+    };
+    
+    const calculateThreshold = (userbiokey, factor) => {
+        return userbiokey * factor;
+    };
+
+    // ----------------------------------------------
+
+
     const [user, setUser] = useState({
         name: "",
         username: "",
@@ -9,6 +55,8 @@ const Register = () => {
         userbiokey: 200,
         Threshold: null,
     })
+        
+    const [confirmPassword, setConfirmPassword] = useState("");
 
     const handleChange = (key, e) => {
         var value = e;
@@ -26,8 +74,13 @@ const Register = () => {
         const isDataAvailable = !!(user.name && user.username && user.password && user.userbiokey && user.Threshold)
         if (isDataAvailable) {
             Axios.post("http://localhost:4000/register", user)
-                .then(res => alert("successful create"))
-            window.href = "/login"
+            .then(res => {
+                alert("successful create");
+                window.location.href = "/";
+            })
+            .catch(err => {
+                alert("Error creating user");
+            });
         }
         else {
             alert("invalid input")
@@ -38,21 +91,45 @@ const Register = () => {
     const handleRegister = (e) => {
         e.preventDefault()
 
-        if (user.password.length > 7 && user.password.length < 11){ //8-10
-            user.Threshold = 20;
-        } else if (user.password.length > 10 && user.password.length < 21){ //11-20
-            console.log("here");
-            user.Threshold = 30;
-        } else if (user.password.length > 20 && user.password.length < 31){ //21-30
-            user.Threshold = 40;
+        if (user.password !== confirmPassword) {
+            alert("Passwords do not match.");
+            return;
         }
+    // ----------------------------------------------
+
+        const factor = getPasswordStrengthFactor(user.password);
+        user.Threshold = calculateThreshold(user.userbiokey, factor);
+
+        const passwordLength = user.password.length;
+    // ----------------------------------------------
+
+        // if (user.password.length > 11 && user.password.length < 20){ //11-20
+        //     user.Threshold = 40;
+        // } else if (user.password.length > 21 && user.password.length < 30){ //21-30
+        //     console.log("here");
+        //     user.Threshold = 50;
+        // } else if (user.password.length > 31 && user.password.length < 100){ //31-100
+        //     user.Threshold = 60;
+        // }
+
+        // if (user.password.length >= 8 && user.password.length < 12){ //11-20
+        //     user.Threshold = 35;
+        // } else if (user.password.length >= 12 && user.password.length < 16){ //21-30
+        //     console.log("here");
+        //     user.Threshold = 40;
+        // } else if (user.password.length >= 16 && user.password.length < 20){ //31-100
+        //     user.Threshold = 50;
+        // }else if (user.password.length >= 21 && user.password.length < 31){ //31-100
+        //     user.Threshold = 60;
+        // }
+
         console.log(user.Threshold); 
         onCreateUser();
     }
 
     return (
         <div class="flex flex-col max-w-md px-4 py-8 rounded-lg shadow bg-gray-800 sm:px-6 md:px-8 lg:px-10">
-            <div class="self-center mb-2 text-xl font-light sm:text-2xl text-white">
+            <div class="self-center mb-2 text-xl font-light sm:text-2xl text-black">
                 Create a new account
             </div>
             <span class="justify-center text-sm text-center flex-items-center text-gray-400">
@@ -85,16 +162,18 @@ const Register = () => {
                     </span>
                     <div class="flex flex-col mb-2">
                         <div class=" relative ">
-                            <input id="create-password" class=" rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="password" value={user.password} onChange={e => handleChange("password", e)} placeholder="password" />
+                            <input id="create-password" class=" rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+ placeholder="password" />
                         </div>
                     </div>
-                    <div class="flex flex-col mb-2">
+                    {/* <div class="flex flex-col mb-2">
                         <div class=" relative ">
-                            <input id="create-password" class=" rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="password" value={user.password} onChange={e => handleChange("password", e)} placeholder="password" />
+                            <input id="create-password" class=" rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="password" value={setConfirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+ placeholder="password" />
                         </div>
-                    </div>
+                    </div> */}
                     <div class="flex w-full my-4">
-                        <button type="submit" class="py-2 px-4  bg-purple-600 hover:bg-purple-700 focus:ring-purple-500 focus:ring-offset-purple-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg " >
+                        <button type="submit" class="py-2 px-4  bg-black hover:bg-purple-700 focus:ring-purple-500 focus:ring-offset-purple-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg " >
                             Register
                         </button>
                     </div>
