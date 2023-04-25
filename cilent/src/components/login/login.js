@@ -11,9 +11,8 @@ const Login = () => {
     });
 
     const [keyEvent, setKeyEvent] = useState({
-        dwellTimeArray: [], //DWELL time    เวลากด -> ปล่อย
-        flightTimeArray: [], //FLIGHT time ยกตัวแรก -> ก่อนกดตัวต่อไป
-        typeSpeedArray: [], //TYPE speed   พิมตัวแรก -> จะเรืมพิมตัวต่อไป
+        holdTimeArray: [], 
+        typeSpeedArray: [], 
     });
 
     var lastKeyUpTimestamp = -1;
@@ -40,8 +39,7 @@ const Login = () => {
 
         if (e.key.length > 1) { // special key
             if (e.key === "Backspace") {
-                handleSetKeyEvent("dwellTimeArray", []) // reset dwel time
-                handleSetKeyEvent("flightTimeArray", []) // reset flight time
+                handleSetKeyEvent("holdTimeArray", []) // reset dwel time
                 handleSetKeyEvent("typeSpeedArray", []) // reset type speed
                 return;
             }
@@ -50,50 +48,97 @@ const Login = () => {
         // When a keyup event occurs, it checks if there is a previous keydown timestamp. If it exists, it calculates the dwell time (time between the current keydown and the current keyup) and pushes it into the dwellTimeArray.
         // The function also updates the lastKeyUpTimestamp and lastKeyDownTimestamp variables to store the timestamps of the current key events for future calculations.
         if (e.type === "keydown") {
-            // When a keydown event occurs
-            // if (lastKeyUpTimestamp >= 0) {
-            //     If there is a previous keyup event
-            //     const flight = e.timeStamp - lastKeyUpTimestamp;
-            //     keyEvent.flightTimeArray.push(flight); // Calculate and store flight time
-            //     console.log("Flight ", keyEvent.flightTimeArray, "key ", e.key);
-            // }
             if (lastKeyDownTimestamp >= 0) {
                 // If there is a previous keydown event
                 const typespeed = e.timeStamp - lastKeyDownTimestamp;
                 keyEvent.typeSpeedArray.push(typespeed)// Calculate and store typing speed
                 console.log("Type Speed ", keyEvent.typeSpeedArray, "key ", e.key);
             }
-        
+
             lastKeyDownTimestamp = e.timeStamp; // Update the lastKeyDownTimestamp 
         } else {
             // When a keyup event occurs
             if (lastKeyDownTimestamp >= 0) {
                 // If there is a previous keydown event
                 const dwel = e.timeStamp - lastKeyDownTimestamp;
-                keyEvent.dwellTimeArray.push(dwel)// Calculate and store dwell time
+                keyEvent.holdTimeArray.push(dwel)// Calculate and store dwell time
             }
             lastKeyUpTimestamp = e.timeStamp; // Update the lastKeyUpTimestamp value
             console.log("lastup ", lastKeyUpTimestamp);
-            console.log("Dwell ", keyEvent.dwellTimeArray, "key ", e.key);
+            console.log("Holding ", keyEvent.holdTimeArray, "key ", e.key);
         };
-
     }
 
     useEffect(() => {
-        const passwordfeild = document.getElementById('sign-in-password')
+        const passwordfeild = document.getElementById('sign-in-password');
 
         passwordfeild.onkeydown = captureKeyEvent;
         passwordfeild.onkeyup = captureKeyEvent;
 
     }, []);
 
-    const handleRegister = async(e) => {
+    const isStrongPassword = (password) => {
+        const hasUpperCases = /[A-Z]/.test(password);
+        const hasLowerCases = /[a-z]/.test(password);
+        const hasNumbers = /[0-9]/.test(password);
+        const hasSpecialCharacters = /[^A-Za-z0-9]/.test(password);
+    
+        return (
+            password.length >= 12 &&
+            hasUpperCases &&
+            hasLowerCases &&
+            hasNumbers &&
+            hasSpecialCharacters
+        );
+    };
+    
+    const isMediumPassword = (password) => {
+        const hasUpperCases = /[A-Z]/.test(password);
+        const hasLowerCases = /[a-z]/.test(password);
+        const hasNumbers = /[0-9]/.test(password);
+    
+        return (
+            password.length >= 8 &&
+            hasUpperCases &&
+            hasLowerCases &&
+            hasNumbers
+        );
+    };
+
+    const isWeakPassword = (password) => {
+        const hasLowerCases = /[a-z]/.test(password);
+        const hasNumbers = /[0-9]/.test(password);
+
+        return (
+            password.length >= 6 && 
+            hasLowerCases && 
+            hasNumbers
+        );
+    };
+    
+    const getPasswordStrengthFactor = (password) => {
+        if (isStrongPassword(password)) {
+            return 0.3;
+        } else if (isMediumPassword(password)) {
+            return 0.2;
+        } else if (isWeakPassword(password)){
+            return 0.1;
+        }
+    };
+
+    const handleRegister = async(e, keystrokeTime) => {
         e.preventDefault()
         try {
             await axios.post("http://localhost:4000/login", user).then((res) => {
             var user = res.data;
             alert(`Congratulation!! ${user.name}, you just log in to our website`);
-            navigate.push("/")
+            console.log("Username:", user.username);
+            console.log("Biometickey:", user.userbiokey);
+            console.log("Threshold:", user.Threshold);
+            console.log("Lowest Range:", Math.ceil(user.userbiokey - user.Threshold).toString() + " < " + keystrokeTime);
+            console.log("Highest Range:", Math.ceil(user.userbiokey + user.Threshold).toString() + " > " + keystrokeTime);
+            console.log("So Keystroke Time is in the range of the Threshold!!");
+            navigate.push("/");
         })
         } catch(err) {
             if (axios.isAxiosError(err)) {
@@ -107,13 +152,16 @@ const Login = () => {
 
     function handlelogin(e) {
         e.preventDefault()
-        let sum = keyEvent.dwellTimeArray[keyEvent.dwellTimeArray.length - 1];// dwel time
+        let sum = 0;
+        let lastHoldingTime = keyEvent.holdTimeArray[keyEvent.holdTimeArray.length - 1];
         for (let i = 0; i < keyEvent.typeSpeedArray.length; i++) {
             sum += keyEvent.typeSpeedArray[i];
         }
-        let length = keyEvent.typeSpeedArray.length + 1
-        user.userbiokey = sum / length
-        handleRegister(e)
+        let length = keyEvent.typeSpeedArray.length + 1;
+        let keystrokeTime = (sum / length) + lastHoldingTime;
+        user.userbiokey = (sum / length) + lastHoldingTime;
+        console.log("Keystroke Time: " + user.userbiokey);
+        handleRegister(e, keystrokeTime)
     }
 
     return (
