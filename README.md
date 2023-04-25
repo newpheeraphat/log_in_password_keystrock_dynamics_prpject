@@ -22,6 +22,6 @@ Type `npm run dev`
 
 
 # Group Member
-- 6388100
-- 6388075
-- 6388201
+- 6388100 Pheeraphat Prisan
+- 6388075 Phuritat Wijitluksana
+- 6388201 Phuvanarth Wangmuk
