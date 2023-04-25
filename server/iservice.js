@@ -1,16 +1,16 @@
 const UserModel = require("./models/Users");
 
 async function getByUsername(userParam) {
-    console.log("seaching for username...");
+    console.log("Seaching for username...");
     const response = await UserModel.findOne({ username: userParam.username,  password: userParam.password });
     return response;
 }
 
 async function create(userParam) {
-    console.log("creating...");
+    console.log("Creating the user information...");
     // validate
     if (await UserModel.findOne({ username: userParam.username })) {
-        throw 'Username "' + userParam.username + '" is already taken';
+        throw 'Unfortunately,"' + userParam.username + '" username is already taken T.T';
     }
 
     const user = new UserModel(userParam);

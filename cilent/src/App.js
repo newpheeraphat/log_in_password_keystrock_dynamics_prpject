@@ -1,7 +1,6 @@
 import React from 'react'
 import Login from "./components/login/login"
 import Register from "./components/register/register"
-import Homepage from './components/homepage/homepage';
 
 // This is a React Router v6 app
 import {

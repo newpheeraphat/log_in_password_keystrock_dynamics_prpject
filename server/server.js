@@ -1,6 +1,5 @@
 const express = require('express');
 const app = express();
-const Quotes = require('inspirational-quotes');
 const mongoose = require('mongoose');
 const iService = require("./iservice");
 
@@ -20,35 +19,31 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', "*");
     res.header('Access-Control-Allow-Headers', 'Origins, X-Requested-With, Content-Type, Accept');
     next();
-})
-
-// app.get('/', (req, res) => {
-//     res.send(Quotes.getQuote());
-// });
+});
 
 app.listen(4000, () => {
-    console.log("Sever started on port 4000");
+    console.log("Server started on port 4000");
 })
 
 app.post("/register", register)
 app.post("/login", login)
 
 async function login(req, res) {
-    console.log("on seaching for username...");
+    console.log("Looking for the username...");
     const user = await iService.getByUsername(req.body)
-    if (user == null) return res.status(400).json({message: "Please enter a valid Username or Password"})
+    if (user == null) return res.status(400).json({message: "Invalid Username and Password!"})
 
-    if ((user.userbiokey-user.Threshold < req.body.userbiokey) && (user.userbiokey+user.Threshold > req.body.userbiokey)) {
+    if ((user.userbiokey + user.Threshold > req.body.userbiokey) && (user.userbiokey - user.Threshold < req.body.userbiokey)) {
         console.log(user.userbiokey.toString() - user.Threshold.toString() + " < " + req.body.userbiokey);
-        console.log(user.userbiokey.toString() + user.Threshold.toString() + " > " + req.body.userbiokey);
+        console.log((user.userbiokey + user.Threshold).toString() + " > " + req.body.userbiokey);
         return res.json(user)
     } else {
-        return res.status(400).json({message: "Error: Please enter Password again"})
+        return res.status(400).json({message: "Error: Sorry, but please try to type your password again"});
     }
 }
 
 function register(req, res, next) {
-    console.log("on creating...");
+    console.log("Creating the user information...");
     iService.create(req.body)
         .then(() => res.json({}))
         .catch(err => next(err));

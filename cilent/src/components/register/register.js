@@ -100,29 +100,6 @@ const Register = () => {
         const factor = getPasswordStrengthFactor(user.password);
         user.Threshold = calculateThreshold(user.userbiokey, factor);
 
-        const passwordLength = user.password.length;
-    // ----------------------------------------------
-
-        // if (user.password.length > 11 && user.password.length < 20){ //11-20
-        //     user.Threshold = 40;
-        // } else if (user.password.length > 21 && user.password.length < 30){ //21-30
-        //     console.log("here");
-        //     user.Threshold = 50;
-        // } else if (user.password.length > 31 && user.password.length < 100){ //31-100
-        //     user.Threshold = 60;
-        // }
-
-        // if (user.password.length >= 8 && user.password.length < 12){ //11-20
-        //     user.Threshold = 35;
-        // } else if (user.password.length >= 12 && user.password.length < 16){ //21-30
-        //     console.log("here");
-        //     user.Threshold = 40;
-        // } else if (user.password.length >= 16 && user.password.length < 20){ //31-100
-        //     user.Threshold = 50;
-        // }else if (user.password.length >= 21 && user.password.length < 31){ //31-100
-        //     user.Threshold = 60;
-        // }
-
         console.log(user.Threshold); 
         onCreateUser();
     }
@@ -162,8 +139,7 @@ const Register = () => {
                     </span>
                     <div class="flex flex-col mb-2">
                         <div class=" relative ">
-                            <input id="create-password" class=" rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
- placeholder="password" />
+                            <input id="create-password" class=" rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="password" />
                         </div>
                     </div>
                     {/* <div class="flex flex-col mb-2">

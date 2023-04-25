@@ -1,29 +1,27 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios';
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const [user, setUser] = useState({
         username: "",
         password: "",
         userbiokey: -1
-    })
+    });
 
     const [keyEvent, setKeyEvent] = useState({
-        dwellTimeArray: [], //dwel time    เวลากด -> ปล่อย
-        flightTimeArray: [], //flight time ยกตัวแรก -> ก่อนกดตัวต่อไป
-        typeSpeedArray: [], //type speed   พิมตัวแรก -> จะเรืมพิมตัวต่อไป
-    })
+        dwellTimeArray: [], //DWELL time    เวลากด -> ปล่อย
+        flightTimeArray: [], //FLIGHT time ยกตัวแรก -> ก่อนกดตัวต่อไป
+        typeSpeedArray: [], //TYPE speed   พิมตัวแรก -> จะเรืมพิมตัวต่อไป
+    });
 
     var lastKeyUpTimestamp = -1;
     var lastKeyDownTimestamp= -1;
 
     const handleChange = (key, e) => {
-        var value = e
-        if (key !== "userbiokey") {
-            value = e.target.value
-        }
+        var value = e;
+        if (key !== "userbiokey") { value = e.target.value; }
 
         setUser({
             ...user,
@@ -53,31 +51,29 @@ const Login = () => {
         // The function also updates the lastKeyUpTimestamp and lastKeyDownTimestamp variables to store the timestamps of the current key events for future calculations.
         if (e.type === "keydown") {
             // When a keydown event occurs
-            if (lastKeyUpTimestamp >= 0) {
-                // If there is a previous keyup event
-                const flight = e.timeStamp - lastKeyUpTimestamp;
-                keyEvent.flightTimeArray.push(flight); // Calculate and store flight time
-                console.log("Flight ", keyEvent.flightTimeArray, "key ", e.key);
-            }
-        
+            // if (lastKeyUpTimestamp >= 0) {
+            //     If there is a previous keyup event
+            //     const flight = e.timeStamp - lastKeyUpTimestamp;
+            //     keyEvent.flightTimeArray.push(flight); // Calculate and store flight time
+            //     console.log("Flight ", keyEvent.flightTimeArray, "key ", e.key);
+            // }
             if (lastKeyDownTimestamp >= 0) {
                 // If there is a previous keydown event
-                const typespeed = e.timeStamp - lastKeyDownTimestamp
+                const typespeed = e.timeStamp - lastKeyDownTimestamp;
                 keyEvent.typeSpeedArray.push(typespeed)// Calculate and store typing speed
                 console.log("Type Speed ", keyEvent.typeSpeedArray, "key ", e.key);
             }
         
-            lastKeyDownTimestamp = e.timeStamp; // Update the lastKeyDownTimestamp
-            console.log("lastKeyDownTimestamp ", lastKeyDownTimestamp);
+            lastKeyDownTimestamp = e.timeStamp; // Update the lastKeyDownTimestamp 
         } else {
             // When a keyup event occurs
             if (lastKeyDownTimestamp >= 0) {
                 // If there is a previous keydown event
-                const dwel = e.timeStamp - lastKeyDownTimestamp
+                const dwel = e.timeStamp - lastKeyDownTimestamp;
                 keyEvent.dwellTimeArray.push(dwel)// Calculate and store dwell time
             }
-            lastKeyUpTimestamp = e.timeStamp // Update the lastKeyUpTimestamp value
-            console.log("lastKeyUpTimestamp ", lastKeyUpTimestamp);
+            lastKeyUpTimestamp = e.timeStamp; // Update the lastKeyUpTimestamp value
+            console.log("lastup ", lastKeyUpTimestamp);
             console.log("Dwell ", keyEvent.dwellTimeArray, "key ", e.key);
         };
 
@@ -96,8 +92,7 @@ const Login = () => {
         try {
             await axios.post("http://localhost:4000/login", user).then((res) => {
             var user = res.data;
-            alert(`hello ${user.name}`);
-            console.log({ user });
+            alert(`Congratulation!! ${user.name}, you just log in to our website`);
             navigate.push("/")
         })
         } catch(err) {
@@ -112,17 +107,12 @@ const Login = () => {
 
     function handlelogin(e) {
         e.preventDefault()
-        console.log("handle login");
         let sum = keyEvent.dwellTimeArray[keyEvent.dwellTimeArray.length - 1];// dwel time
-
         for (let i = 0; i < keyEvent.typeSpeedArray.length; i++) {
             sum += keyEvent.typeSpeedArray[i];
         }
-
         let length = keyEvent.typeSpeedArray.length + 1
         user.userbiokey = sum / length
-
-        console.log("userbiokey ", user.userbiokey);
         handleRegister(e)
     }
 
