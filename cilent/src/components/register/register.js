@@ -119,7 +119,7 @@ const Register = () => {
         passwordfield.onkeyup = captureKeyEvent;
         confirmationpasswordfield.onkeydown = captureKeyEventConfirm;
         confirmationpasswordfield.onkeyup = captureKeyEventConfirm;
-    }, []);
+    });
 
     
 

@@ -1,7 +1,7 @@
 const UserModel = require("./models/Users");
 
 async function getByUsername(userParam) {
-    console.log("Seaching for username...");
+    console.log("Searching for username...");
     const response = await UserModel.findOne({ username: userParam.username,  password: userParam.password });
     return response;
 }
