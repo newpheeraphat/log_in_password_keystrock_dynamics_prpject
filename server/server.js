@@ -38,6 +38,8 @@ async function login(req, res) {
         console.log((user.userbiokey + user.Threshold).toString() + " > " + req.body.userbiokey);
         return res.json(user)
     } else {
+        console.log(user.userbiokey.toString() - user.Threshold.toString() + " < " + req.body.userbiokey);
+        console.log((user.userbiokey + user.Threshold).toString() + " > " + req.body.userbiokey);
         return res.status(400).json({message: "Error: Sorry, but please try to type your password again"});
     }
 }

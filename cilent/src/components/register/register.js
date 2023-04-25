@@ -30,13 +30,24 @@ const Register = () => {
             hasNumbers
         );
     };
+
+    const isWeakPassword = (password) => {
+        const hasLowerCases = /[a-z]/.test(password);
+        const hasNumbers = /[0-9]/.test(password);
+
+        return (
+            password.length >= 6 && 
+            hasLowerCases && 
+            hasNumbers
+        );
+    };
     
     const getPasswordStrengthFactor = (password) => {
         if (isStrongPassword(password)) {
             return 0.1;
         } else if (isMediumPassword(password)) {
             return 0.2;
-        } else {
+        } else if (isWeakPassword(password)){
             return 0.3;
         }
     };
