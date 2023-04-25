@@ -6,7 +6,8 @@ import Register from "./components/register/register"
 import {
   BrowserRouter,
   Routes,
-  Route
+  Route,
+  Link
 } from "react-router-dom";
 
 function App() {
